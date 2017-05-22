@@ -1,3 +1,4 @@
+import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -5,8 +6,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import xyz.fz.Application;
+import xyz.fz.dao.brand.BrandDao;
+import xyz.fz.domain.brand.TBrand;
 import xyz.fz.domain.role.TRoleAuth;
 import xyz.fz.service.role.RoleAuthService;
+
+import java.util.List;
 
 /**
  * Created by fz on 2016/9/19.
@@ -20,6 +25,9 @@ public class DaoTest {
 
     @Autowired
     private RoleAuthService roleAuthService;
+
+    @Autowired
+    private BrandDao brandDao;
 
     @Test
     public void roleAddTest() {
@@ -42,5 +50,18 @@ public class DaoTest {
         roleAuth.setMenuId(1L);
         roleAuth.setAuthId(0L);
         roleAuthService.saveRoleAuth(roleAuth);
+    }
+
+    @Test
+    public void brandBatchAddTest() {
+        List<TBrand> list = Lists.newArrayList();
+        String baseName = "brand-";
+        for (int i=0; i<1000; i++) {
+            TBrand brand = new TBrand();
+            brand.setIsActivity(1);
+            brand.setBrandName(baseName + i);
+            list.add(brand);
+        }
+        brandDao.save(list);
     }
 }
