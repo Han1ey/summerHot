@@ -2,6 +2,7 @@ package xyz.fz.controller;
 
 import com.google.code.kaptcha.impl.DefaultKaptcha;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +71,7 @@ public class IndexController {
                 session.setAttribute("curUser", user);
                 result.put("success", true);
             } else {
+                session.setAttribute("valCode", RandomUtils.nextDouble());
                 result.put("success", false);
                 result.put("message", "用户名或密码错误");
             }
