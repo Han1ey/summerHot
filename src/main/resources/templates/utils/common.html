@@ -356,6 +356,21 @@
             /*]]>*/
         </script>
     </baseTemplate>
+
+    <brandTemplate th:fragment="brandTemplate">
+        <script type="text/javascript" th:inline="javascript">
+            /*<![CDATA[*/
+            var brandList = [];
+            var brandMap = {};
+            $.post(basePath + "brand/brandList", {}, function (json) {
+                brandList = json;
+                for (var i=0; i<json.length; i++) {
+                    brandMap[json[i].id] = json[i].brandName;
+                }
+            }, 'json');
+            /*]]>*/
+        </script>
+    </brandTemplate>
 </head>
 <body>
 </body>

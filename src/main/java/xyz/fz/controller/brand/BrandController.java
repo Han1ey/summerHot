@@ -13,6 +13,7 @@ import xyz.fz.domain.brand.TBrand;
 import xyz.fz.service.brand.BrandService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -81,5 +82,11 @@ public class BrandController {
             result.put("message", e.getMessage());
         }
         return result;
+    }
+
+    @RequestMapping("/brandList")
+    @ResponseBody
+    public List<TBrand> brandList() {
+        return brandService.brandList();
     }
 }

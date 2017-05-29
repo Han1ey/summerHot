@@ -24,6 +24,8 @@ public class UserServiceImpl implements UserService {
 
     private final CommonDao commonDao;
 
+    private String DEFAULT_PASSWORD = "88888888";
+
     @Autowired
     public UserServiceImpl(UserDao userDao, CommonDao commonDao) {
         this.userDao = userDao;
@@ -96,8 +98,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void resetPassWord(Long id) {
         TUser user = userDao.findOne(id);
-        String defaultPassWord = "88888888";
-        user.setPassWord(BaseUtil.sha256Hex(defaultPassWord));
+        user.setPassWord(BaseUtil.sha256Hex(DEFAULT_PASSWORD));
         userDao.save(user);
     }
 

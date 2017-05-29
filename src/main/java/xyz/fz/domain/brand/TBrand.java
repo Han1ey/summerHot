@@ -15,7 +15,7 @@ public class TBrand {
     @Column(nullable = false, length = 30)
     private String brandName;
 
-    @Column(nullable = false, columnDefinition = "tinyint not null")
+    @Column(nullable = false, columnDefinition = "tinyint")
     private Integer isActivity;
 
     public Long getId() {

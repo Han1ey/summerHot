@@ -1,13 +1,17 @@
 package xyz.fz.service.impl.brand;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import xyz.fz.dao.brand.BrandDao;
 import xyz.fz.domain.brand.TBrand;
 import xyz.fz.service.brand.BrandService;
+
+import java.util.List;
+
+import static org.springframework.data.domain.ExampleMatcher.GenericPropertyMatchers.contains;
 
 /**
  * Created by fz on 2016/9/19.
@@ -26,11 +30,13 @@ public class BrandServiceImpl implements BrandService {
     }
 
     @Override
+    @CacheEvict(value = {"allBrand"}, allEntries = true)
     public TBrand saveBrand(TBrand brand) {
         return brandDao.save(brand);
     }
 
     @Override
+    @CacheEvict(value = {"allBrand"}, allEntries = true)
     public void toggle(Long id) {
         TBrand brand = brandDao.findOne(id);
         if (brand.getIsActivity() == 0) {
@@ -39,5 +45,16 @@ public class BrandServiceImpl implements BrandService {
             brand.setIsActivity(0);
         }
         brandDao.save(brand);
+    }
+
+    @Override
+    @Cacheable(value = "allBrand", keyGenerator = "myRedisKeyGenerator")
+    public List<TBrand> brandList() {
+        TBrand brand = new TBrand();
+        brand.setIsActivity(1);
+        ExampleMatcher matcher = ExampleMatcher.matching();
+        matcher = matcher.withMatcher("id", contains().exact());
+        Example<TBrand> brandExample = Example.of(brand, matcher);
+        return brandDao.findAll(brandExample);
     }
 }
