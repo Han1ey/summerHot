@@ -38,7 +38,7 @@
             "targets": -1,
             render: function (data, type, row) {
                 var options = "";
-                options += " <button class='btn btn-warning btn-xs' onclick='modify(" + row.id + ", " + JSON.stringify(row.brandName) + ")'>修改</button>";
+                options += " <button class='btn btn-info btn-xs' onclick='modify(" + row.id + ", " + JSON.stringify(row.brandName) + ")'>修改</button>";
                 if (row.isActivity) {
                     options += " <button class='btn btn-danger btn-xs' onclick='toggle(" + row.id + ")'>禁用</button>";
                 } else {
@@ -157,7 +157,7 @@
             <label for="sIsActivity">
                 是否有效：
             </label>
-            <select id="sIsActivity">
+            <select id="sIsActivity" style="width: 80px">
                 <option value="1">有效</option>
                 <option value="0">无效</option>
             </select>
@@ -182,10 +182,13 @@
 
 <div id="dialog" title="新增/修改" style="display: block;">
     <input id="id" type="hidden"/>
-    <table width="300px;" style="border-collapse: separate; border-spacing: 5px;">
+    <table width="320px;" style="border-collapse: separate; border-spacing: 5px;">
         <tr>
             <td style="text-align: right">品牌名称：</td>
-            <td><input title="品牌名称" id="brandName"/></td>
+            <td>
+                <input title="品牌名称" id="brandName"/>
+                <span style="color: red">*</span>
+            </td>
         </tr>
     </table>
 </div>

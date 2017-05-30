@@ -23,6 +23,8 @@
         <link rel="stylesheet" type="text/css" th:href="@{/pubs/datatables/jquery.dataTables.css}"/>
         <script type="text/javascript" charset="utf8" th:src="@{/pubs/datatables/jquery.dataTables.js}"></script>
         <script th:src="@{/pubs/js/notify.min.js}"></script>
+        <link th:href="@{/pubs/chosen_v1.7.0/chosen.css}" rel="stylesheet"/>
+        <script th:src="@{/pubs/chosen_v1.7.0/chosen.jquery.js}"></script>
 
         <!-- local setting -->
         <style type="text/css">
@@ -114,6 +116,10 @@
                 width: 100%;
                 background: rgba(255, 255, 255, 0);
             }
+
+            .chosen-container .chosen-results {
+                max-height: 100px;
+            }
         </style>
         <script type="text/javascript" th:inline="javascript">
             /*<![CDATA[*/
@@ -152,6 +158,12 @@
                         }, 2000);
                         return false;
                     }
+                });
+
+                var $select = $("select");
+                $select.chosen({
+                    no_results_text: "没有结果！",
+                    search_contains: true
                 });
             });
 
@@ -362,12 +374,25 @@
             /*<![CDATA[*/
             var brandList = [];
             var brandMap = {};
-            $.post(basePath + "brand/brandList", {}, function (json) {
-                brandList = json;
-                for (var i=0; i<json.length; i++) {
-                    brandMap[json[i].id] = json[i].brandName;
-                }
-            }, 'json');
+            $.ajax({
+                type: 'POST',
+                url: basePath + "brand/brandList",
+                data: {},
+                success: function (json) {
+                    brandList = json;
+                    for (var i = 0; i < json.length; i++) {
+                        brandMap[json[i].id] = json[i].brandName;
+                    }
+                },
+                dataType: 'json',
+                async: false
+            });
+            $(function () {
+                setTimeout(function () {
+                    // 可以优化为只chosen:updated本次ajax的select
+                    $("select").trigger("chosen:updated");
+                }, 100);
+            });
             /*]]>*/
         </script>
     </brandTemplate>

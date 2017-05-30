@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>商品管理</title>
+    <headerTemplate th:include="utils/common::headerTemplate"></headerTemplate>
+    <brandTemplate th:include="utils/common::brandTemplate"></brandTemplate>
+    <script th:inline="javascript" type="text/javascript">
+        /*<![CDATA[*/
+        var table;
+
+        function search() {
+            table.ajax.reload();
+        }
+
+        var paramsFun = function () {
+            var params = {};
+            params.name = $("#sName").val();
+            params.brandId = $("#sBrandId").val();
+            params.number = $("#sNumber").val();
+            params.isActivity = $("#sIsActivity").val();
+            return params;
+        };
+
+        var columns = [{
+            data: "id"
+        }, {
+            data: "productName",
+            width: 100
+        }, {
+            data: "productNumber",
+            width: 120
+        }, {
+            data: "brandId"
+        }, {
+            data: null,
+            defaultContent: '',
+            width: 100
+        }, {
+            data: "price",
+            width: 80
+        }, {
+            data: "isActivity",
+            width: 60
+        }, {
+            data: null,
+            defaultContent: ''
+        }];
+
+        var columnDefs = [{
+            "visible": false,
+            "targets": [1]
+        }, {
+            "visible": false,
+            "targets": [4]
+        }, {
+            "targets": [5],
+            render: function (data, type, row) {
+                if (row.brandId) {
+                    return brandMap[row.brandId];
+                } else {
+                    return "";
+                }
+            }
+        }, {
+            "targets": -2,
+            render: function (data, type, row) {
+                if (row.isActivity) {
+                    return "<span style='color: green;'>有效</span>";
+                } else {
+                    return "<span style='color: red;'>无效</span>";
+                }
+            }
+        }, {
+            "targets": -1,
+            render: function (data, type, row) {
+                var options = "";
+                options += " <button class='btn btn-info btn-xs' onclick='modify(" + JSON.stringify(row) + ")'>修改</button>";
+                if (row.isActivity) {
+                    options += " <button class='btn btn-danger btn-xs' onclick='toggle(" + row.id + ")'>禁用</button>";
+                } else {
+                    options += " <button class='btn btn-success btn-xs' onclick='toggle(" + row.id + ")'>启用</button>";
+                }
+                return options;
+            }
+        }];
+
+        function modify(json) {
+            var row = json;
+            $("#id").val(row.id);
+            $("#productName").val(row.productName);
+            $("#productNumber").val(row.productNumber);
+            var $brandId = $("#brandId");
+            $brandId.val(row.brandId);
+            $brandId.trigger("chosen:updated");
+            $("#price").val(row.price);
+            $("#dialog").dialog("open");
+        }
+
+        function toggle(id) {
+            cleanMask.open();
+            $.post(basePath + "product/toggle", {
+                id: id
+            }, function (json) {
+                cleanMask.close();
+                if (json.success) {
+                    $.notify("成功", {className: "success"});
+                    search();
+                } else {
+                    $(me).notify("失败[" + json.message + "]", {className: "error", position: "right"});
+                }
+            }, 'json');
+        }
+
+        $(function () {
+            var $sBrandId = $("#sBrandId");
+            var $brandId = $("#brandId");
+            for (var i = 0; i < brandList.length; i++) {
+                $sBrandId.append("<option value='" + brandList[i].id + "'>" + brandList[i].brandName + "</option>");
+                $brandId.append("<option value='" + brandList[i].id + "'>" + brandList[i].brandName + "</option>");
+            }
+
+            table = new XDataTables("dtTab", basePath + "product/productPageList", paramsFun, columns, columnDefs, true, {scrollY: 320});
+
+            $("#dialog").dialog({
+                dialogClass: "no-close",
+                closeOnEscape: false,
+                draggable: false,
+                autoOpen: false,
+                modal: true,
+                width: 380,
+                height: 315,
+                resizable: false,
+                buttons: [{
+                    text: "保存",
+                    click: function () {
+                        var $id = $("#id");
+                        var $productName = $("#productName");
+                        var $productNumber = $("#productNumber");
+                        var $brandId = $("#brandId");
+                        var $price = $("#price");
+                        if ($productName.val() && $productNumber.val() && $brandId.val() && $price.val()) {
+                            cleanMask.open();
+                            $.post(basePath + "product/saveProduct", {
+                                id: $id.val(),
+                                productName: $productName.val(),
+                                productNumber: $productNumber.val(),
+                                brandId: $brandId.val(),
+                                price: $price.val()
+                            }, function (json) {
+                                cleanMask.close();
+                                if (json.success) {
+                                    $.notify("保存成功");
+                                    $("#dialog").dialog("close");
+                                    search();
+                                } else {
+                                    $.notify(json.message);
+                                }
+                            }, 'json');
+                        } else {
+                            $.notify("请先完善数据后再保存");
+                        }
+                    }
+                }, {
+                    text: "关闭",
+                    click: function () {
+                        $(this).dialog("close");
+                    }
+                }]
+            });
+
+            $("#sName").bind("keypress", function (event) {
+                if (event.keyCode === 13) {
+                    search();
+                }
+            });
+            $("#sNumber").bind("keypress", function (event) {
+                if (event.keyCode === 13) {
+                    search();
+                }
+            });
+            $("#search").bind("click", function () {
+                search();
+            });
+            $("#addBtn").bind("click", function () {
+                $("#id").val("");
+                $("#productName").val("");
+                $("#productNumber").val("");
+                $("#price").val("");
+                $("#dialog").dialog("open");
+            });
+        });
+        /*]]>*/
+    </script>
+</head>
+<body>
+<div style="margin: 5px;">
+    <div id="toolBar" style="margin-bottom: 5px;">
+        <div>
+            <input id="addBtn" type="button" class="btn btn-info btn-xs" value="新增"/>
+        </div>
+        <div>
+            <label for="sName">商品名称：</label>
+            <input id="sName"/>
+            <label for="sNumber">商品编码：</label>
+            <input id="sNumber"/>
+            <label for="sBrandId">品牌：</label>
+            <select id="sBrandId" style="width: 180px">
+                <option value="">全部</option>
+            </select>
+            <label for="sIsActivity">是否有效：</label>
+            <select id="sIsActivity" style="width: 80px">
+                <option value="1">有效</option>
+                <option value="0">无效</option>
+            </select>
+            <input id="search" class="btn btn-success btn-xs" type="button" value="查询"/>
+        </div>
+    </div>
+    <table id="dtTab" class="dataTable compact display cell-border hover order-column row-border stripe" cellspacing="0"
+           width="100%">
+        <thead>
+        <tr>
+            <th>序号</th>
+            <th>ID</th>
+            <th>商品名称</th>
+            <th>商品编码</th>
+            <th>品牌ID</th>
+            <th>品牌名称</th>
+            <th>价格</th>
+            <th>是否有效</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <div id="dialog" title="新增/修改">
+        <input id="id" type="hidden"/>
+        <table width="350px;" style="border-collapse: separate; border-spacing: 5px;">
+            <tr>
+                <td style="text-align: right">品牌：</td>
+                <td>
+                    <select id="brandId" title="品牌" style="width: 180px"></select>
+                    <span style="color: red">*</span>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right">商品名称：</td>
+                <td>
+                    <input title="商品名称" id="productName"/>
+                    <span style="color: red">*</span>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right">商品编码：</td>
+                <td>
+                    <input title="商品编码" id="productNumber"/>
+                    <span style="color: red">*</span>
+                </td>
+            </tr>
+            <tr>
+                <td style="text-align: right">价格：</td>
+                <td>
+                    <input title="价格" id="price"/>
+                    <span style="color: red">*</span>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+</body>
+</html>
