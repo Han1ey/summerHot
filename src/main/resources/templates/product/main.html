@@ -119,7 +119,7 @@
                 $brandId.append("<option value='" + brandList[i].id + "'>" + brandList[i].brandName + "</option>");
             }
 
-            table = new XDataTables("dtTab", basePath + "product/productPageList", paramsFun, columns, columnDefs, true, {scrollY: 320});
+            table = new XDataTables("dtTab", basePath + "product/productPageList", paramsFun, columns, columnDefs, true);
 
             $("#dialog").dialog({
                 dialogClass: "no-close",
